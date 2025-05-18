@@ -11,8 +11,31 @@ export class ProductRepository implements IProductRepository {
     private readonly repo: Repository<Product>,
   ) {}
 
-  async findAll(): Promise<Product[]> {
-    return this.repo.find();
+  async findAll(
+    page: number,
+    limit: number,
+    sortKey: keyof Product,
+    sortValue: 'ASC' | 'DESC',
+  ): Promise<{
+    data: Product[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    const [data, total] = await this.repo.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: {
+        [sortKey]: sortValue,
+      },
+    });
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   async findById(id: number): Promise<Product | null> {
@@ -44,5 +67,14 @@ export class ProductRepository implements IProductRepository {
 
     const updated = this.repo.merge(product, dto);
     return this.repo.save(updated);
+  }
+
+  async softDelete(id: number): Promise<Product | null> {
+    const product = await this.repo.findOne({ where: { id } });
+    if (!product) {
+      return null;
+    }
+    await this.repo.softDelete(id);
+    return product;
   }
 }

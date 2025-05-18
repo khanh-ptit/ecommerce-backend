@@ -4,6 +4,7 @@ import { Product } from 'src/entities/product.entity';
 import { IProductRepository } from 'src/repository/product/interface/product.interface';
 import { CreateProductDto } from './dto/create-product.dto';
 import { EditProductDto } from './dto/edit-product.dto';
+import { ProductQueryDto } from './dto/product-query.dto';
 
 @Injectable()
 export class ProductService {
@@ -12,8 +13,9 @@ export class ProductService {
     private readonly productRepository: IProductRepository,
   ) {}
 
-  async getAllProducts(): Promise<Product[]> {
-    return this.productRepository.findAll();
+  async getAllProducts(query: ProductQueryDto) {
+    const { page, limit, sortKey, sortValue } = query;
+    return this.productRepository.findAll(page, limit, sortKey, sortValue);
   }
 
   async getProductById(id: number): Promise<Product | null> {
@@ -30,5 +32,9 @@ export class ProductService {
 
   async editProduct(id: number, dto: EditProductDto): Promise<Product> {
     return this.productRepository.edit(id, dto);
+  }
+
+  async softDelete(id: number) {
+    return this.productRepository.softDelete(id);
   }
 }

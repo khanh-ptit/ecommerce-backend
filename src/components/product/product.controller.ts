@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import systemconfig from '../../common/system';
 import { ProductService } from './product.service';
@@ -15,6 +16,7 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { EditProductDto } from './dto/edit-product.dto';
+import { ProductQueryDto } from './dto/product-query.dto';
 
 @ApiTags('products')
 @Controller(`${systemconfig.API_VERSION}/products`)
@@ -39,8 +41,9 @@ export class ProductController {
   }
 
   @Get()
-  async getAll(): Promise<Product[]> {
-    return this.productService.getAllProducts();
+  async getAll(@Query() query: ProductQueryDto): Promise<ResponseDto<any>> {
+    const products = await this.productService.getAllProducts(query);
+    return new ResponseDto(200, 'Lấy danh sách sản phẩm thành công', products);
   }
 
   @Get('/detail/:id')
@@ -71,5 +74,20 @@ export class ProductController {
     const deleted = await this.productService.deleteOneProduct(id);
 
     return new ResponseDto(200, 'Xóa sản phẩm thành công', deleted);
+  }
+
+  @Delete('soft-delete/:id')
+  async softDelete(
+    @Param('id') id: number,
+  ): Promise<ResponseDto<Product | null>> {
+    const product = await this.productService.getProductById(id);
+
+    if (!product) {
+      throw new NotFoundException(`Sản phẩm ID = ${id} không tồn tại!`);
+    }
+
+    const deleted = await this.productService.softDelete(id);
+
+    return new ResponseDto(200, 'Xóa mềm sản phẩm thành công', deleted);
   }
 }
