@@ -12,7 +12,7 @@ import {
 import systemconfig from '../../common/system';
 import { ProductService } from './product.service';
 import { Product } from 'src/entities/product.entity';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { EditProductDto } from './dto/edit-product.dto';
@@ -40,6 +40,35 @@ export class ProductController {
     return new ResponseDto(200, 'Cập nhật sản phẩm thành công', product);
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Trang hiện tại',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 2,
+    description: 'Số lượng sản phẩm mỗi trang',
+  })
+  @ApiQuery({
+    name: 'sortKey',
+    required: false,
+    type: String,
+    example: 'price',
+    description: 'Trường cần sắp xếp (id, name, price, description)',
+  })
+  @ApiQuery({
+    name: 'sortValue',
+    required: false,
+    type: String,
+    example: 'DESC',
+    enum: ['ASC', 'DESC'],
+    description: 'Thứ tự sắp xếp (tăng/giảm dần)',
+  })
   @Get()
   async getAll(@Query() query: ProductQueryDto): Promise<ResponseDto<any>> {
     const products = await this.productService.getAllProducts(query);

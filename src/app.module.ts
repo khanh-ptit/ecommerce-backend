@@ -4,6 +4,9 @@ import { DataSource } from 'typeorm';
 import { ProductModule } from './components/product/product.module';
 import { CustomerModule } from './components/customer/customer.module';
 import { OrderModule } from './components/order/order.module';
+import { Product } from './entities/product.entity';
+import { Order } from './entities/order.entity';
+import { Customer } from './entities/customer.entity';
 
 @Module({
   imports: [
@@ -14,8 +17,9 @@ import { OrderModule } from './components/order/order.module';
       username: 'postgres',
       password: '123456',
       database: 'postgres',
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
+      entities: [Product, Order, Customer],
     }),
     ProductModule,
     CustomerModule,
